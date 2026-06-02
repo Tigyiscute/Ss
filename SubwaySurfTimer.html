@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedrun Overlay Dashboard</title>
+    <title>Speedrun Overlay</title>
     <style>
         body, html {
             margin: 0;
@@ -26,43 +26,55 @@
             z-index: 1;
         }
 
-        /* Thick black block matching image_4.png exactly */
+        /* The Skinny Black Bar: Long and thin per image_4.png */
         .timer-bar {
             position: absolute;
             top: 24%; 
             left: 0;
-            width: 200px; /* Locked width */
-            height: 55px; /* Restored thickness - Not skinny */
+            width: 160px; 
+            height: 32px; /* Skinny height */
             background: #000000; 
-            padding: 0 15px;
+            padding: 0 10px;
             box-sizing: border-box;
             display: flex;
-            justify-content: flex-end; /* Aligns white numbers to the right */
+            justify-content: flex-end; 
             align-items: center;
             z-index: 999999;
             cursor: pointer;
         }
 
-        /* Bold white timer text matching image_4.png layout */
+        /* White text with size difference */
         .time-text {
-            font-size: 42px; /* Thick, readable text size */
+            color: #ffffff; 
             font-weight: 900;
-            color: #ffffff; /* Solid White */
-            letter-spacing: -1px;
             line-height: 1;
-            font-variant-numeric: tabular-nums;
             user-select: none;
+            display: flex;
+            align-items: baseline;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Large main number */
+        .main-num {
+            font-size: 26px;
+        }
+
+        /* Smaller decimals */
+        .sub-num {
+            font-size: 18px; 
+            margin-left: 1px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Fullscreen Game Frame Layer -->
     <iframe id="game-frame" class="game-view" src="https://ss.randomkzn.com"></iframe>
 
-    <!-- Thick Black Bar Overlay -->
     <div class="timer-bar" id="binder-surface">
-        <div class="time-text" id="time-display">0.00</div>
+        <div class="time-text">
+            <span id="main-display" class="main-num">0</span>
+            <span id="sub-display" class="sub-num">.00</span>
+        </div>
     </div>
 
     <script>
@@ -71,7 +83,8 @@
         let timerInterval = null;
         let isRunning = false;
         
-        const displayEl = document.getElementById('time-display');
+        const mainEl = document.getElementById('main-display');
+        const subEl = document.getElementById('sub-display');
         const binderSurface = document.getElementById('binder-surface');
 
         function startPause() {
@@ -91,7 +104,8 @@
             startTime = 0;
             elapsedTime = 0;
             isRunning = false;
-            displayEl.textContent = '0.00';
+            mainEl.textContent = '0';
+            subEl.textContent = '.00';
         }
 
         function updateTime() {
@@ -103,23 +117,22 @@
             let seconds = Math.floor(totalMs / 1000);
             let milliseconds = Math.floor((totalMs % 1000) / 10);
 
-            let sStr = String(seconds).padStart(2, '0');
+            let sStr = String(seconds);
             let msStr = String(milliseconds).padStart(2, '0');
 
             if (minutes > 0) {
-                displayEl.textContent = `${minutes}:${sStr}.${msStr}`;
+                mainEl.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
             } else {
-                displayEl.textContent = `${seconds}.${msStr}`;
+                mainEl.textContent = sStr;
             }
+            subEl.textContent = `.${msStr}`;
         }
 
-        /* Clicking the black bar focuses the hotkeys */
         binderSurface.addEventListener('click', () => {
             window.focus();
             startPause();
         });
 
-        // T to Start/Stop, Y to Reset
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') startPause();
