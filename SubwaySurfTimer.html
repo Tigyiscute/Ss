@@ -26,7 +26,7 @@
             z-index: 1;
         }
 
-        /* The Skinny Black Bar: Width 160px, Height 32px */
+        /* Skinny Black Bar (Width 160px, Height 32px) */
         .timer-bar {
             position: absolute;
             top: 24%; 
@@ -41,9 +41,10 @@
             align-items: center;
             z-index: 999999;
             cursor: pointer;
+            outline: none; /* Removes default browser focus border */
         }
 
-        /* High-Contrast Gradient Text */
+        /* High-Contrast White to Gray Gradient Text */
         .time-text {
             font-weight: 900;
             line-height: 1;
@@ -52,21 +53,19 @@
             align-items: baseline;
             font-variant-numeric: tabular-nums;
             
-            /* High-visibility White to Gray Gradient */
-            background: linear-gradient(to bottom, #ffffff 10%, #888888 90%);
+            /* Sharp White to Slate Gray Gradient */
+            background: linear-gradient(to bottom, #ffffff 15%, #7a7a7a 90%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            
-            -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.1);
         }
 
-        /* Main number - stays constant size */
+        /* Main number stays constant size */
         .main-num {
             font-size: 26px;
         }
 
-        /* Smaller decimals - the "other numbers" */
+        /* Decimals are visibly smaller */
         .sub-num {
             font-size: 18px; 
             margin-left: 1px;
@@ -77,7 +76,7 @@
 
     <iframe id="game-frame" class="game-view" src="https://ss.randomkzn.com"></iframe>
 
-    <div class="timer-bar" id="binder-surface">
+    <div class="timer-bar" id="binder-surface" tabindex="0">
         <div class="time-text">
             <span id="main-display" class="main-num">0</span>
             <span id="sub-display" class="sub-num">.00</span>
@@ -93,7 +92,6 @@
         const mainEl = document.getElementById('main-display');
         const subEl = document.getElementById('sub-display');
         const binderSurface = document.getElementById('binder-surface');
-        const gameFrame = document.getElementById('game-frame');
 
         function startPause() {
             if (!isRunning) {
@@ -136,14 +134,14 @@
             subEl.textContent = `.${msStr}`;
         }
 
-        // Action on click of the bar directly
-        binderSurface.addEventListener('click', () => {
-            window.focus();
+        // Clicking directly on the black bar toggles the timer and listens to keys
+        binderSurface.addEventListener('click', (e) => {
+            binderSurface.focus();
             startPause();
         });
 
-        // Main window event hook
-        window.addEventListener('keydown', (e) => {
+        // Binds hotkeys directly and exclusively to the timer bar element layout
+        binderSurface.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') {
                 e.preventDefault();
@@ -153,22 +151,7 @@
                 e.preventDefault();
                 reset();
             }
-        }, true);
-
-        // PERSISTENT FOCUS REDIRECTOR:
-        // This structural loop bridges the iframe focus gap. It captures the window context 
-        // dynamically so that hotkeys don't instantly decay when the frame initializes.
-        window.addEventListener('blur', () => {
-            setTimeout(() => {
-                if (document.activeElement === gameFrame) {
-                    // Pre-loads window listener contexts
-                    window.focus();
-                }
-            }, 10);
         });
-
-        // Initial launch focus capture
-        window.focus();
     </script>
 </body>
 </html>
