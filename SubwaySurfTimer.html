@@ -52,17 +52,16 @@
             align-items: baseline;
             font-variant-numeric: tabular-nums;
             
-            /* Stronger White to Gray Gradient */
+            /* High-visibility White to Gray Gradient */
             background: linear-gradient(to bottom, #ffffff 10%, #888888 90%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             
-            /* Adds a tiny bit of edge definition */
-            -webkit-text-stroke: 0.5px rgba(255,255,255,0.1);
+            -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.1);
         }
 
-        /* Main number - stays constant */
+        /* Main number - stays constant size */
         .main-num {
             font-size: 26px;
         }
@@ -94,6 +93,7 @@
         const mainEl = document.getElementById('main-display');
         const subEl = document.getElementById('sub-display');
         const binderSurface = document.getElementById('binder-surface');
+        const gameFrame = document.getElementById('game-frame');
 
         function startPause() {
             if (!isRunning) {
@@ -136,18 +136,39 @@
             subEl.textContent = `.${msStr}`;
         }
 
-        // Click bar to focus keys and start/pause
+        // Action on click of the bar directly
         binderSurface.addEventListener('click', () => {
             window.focus();
             startPause();
         });
 
-        // T for Start/Stop, Y for Reset
+        // Main window event hook
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
-            if (key === 't') startPause();
-            if (key === 'y') reset();
+            if (key === 't') {
+                e.preventDefault();
+                startPause();
+            }
+            if (key === 'y') {
+                e.preventDefault();
+                reset();
+            }
+        }, true);
+
+        // PERSISTENT FOCUS REDIRECTOR:
+        // This structural loop bridges the iframe focus gap. It captures the window context 
+        // dynamically so that hotkeys don't instantly decay when the frame initializes.
+        window.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (document.activeElement === gameFrame) {
+                    // Pre-loads window listener contexts
+                    window.focus();
+                }
+            }, 10);
         });
+
+        // Initial launch focus capture
+        window.focus();
     </script>
 </body>
 </html>
