@@ -29,7 +29,7 @@
             bottom: 20px;
             right: 20px;
             width: 280px;
-            background: rgba(17, 17, 17, 0.92);
+            background: rgba(17, 17, 17, 0.95);
             backdrop-filter: blur(4px);
             border: 2px solid #333;
             border-radius: 6px;
@@ -117,7 +117,7 @@
 </head>
 <body>
 
-    <div id="loader">Bypassing Frame Restrictions & Loading Layout...</div>
+    <div id="loader">Syncing Game Data via Global Edge Network...</div>
 
     <div id="site-container"></div>
 
@@ -132,26 +132,31 @@
     </div>
 
     <script>
-        // 1. Bypass Security Restrictions via a Secure CORS Proxy Fetch
-        const targetUrl = "https://therealoness.squareweb.app/newyork";
-        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
+        // Utilizing a vastly more stable CDN Global Edge Proxy
+        const proxyUrl = "https://corsproxy.io/?https%3A%2F%2Ftherealoness.squareweb.app%2Fnewyork";
 
         fetch(proxyUrl)
             .then(response => {
-                if (response.ok) return response.json();
-                throw new Error('Network response failure.');
+                if (!response.ok) throw new Error('Proxy routing failed.');
+                return response.text(); // Grabbing raw HTML structure directly
             })
-            .then(data => {
+            .then(htmlContent => {
                 const container = document.getElementById('site-container');
-                container.innerHTML = data.contents;
+                
+                // Inject target layout cleanly
+                container.innerHTML = htmlContent;
+                
+                // Drop the loading curtain
                 document.getElementById('loader').style.display = 'none';
             })
             .catch(err => {
-                document.getElementById('loader').innerText = "Failed to fetch source page. Try reloading.";
+                document.getElementById('loader').innerText = "Edge network timeout. Refreshing page...";
                 console.error(err);
+                // Auto fallback refresh if network hangs
+                setTimeout(() => { location.reload(); }, 2000);
             });
 
-        // 2. High Precision Speedrun Timer Logic
+        // Speedrun Timer Engine
         let startTime = 0;
         let elapsedTime = 0;
         let timerInterval = null;
@@ -201,16 +206,10 @@
         startPauseBtn.addEventListener('click', startPause);
         resetBtn.addEventListener('click', reset);
 
-        // Custom Keybind Listeners (T and Y)
+        // Custom Keybinds (T and Y)
         window.addEventListener('keydown', (e) => {
-            // "T" key triggers Start/Pause
-            if (e.code === 'KeyT') {
-                startPause();
-            }
-            // "Y" key triggers Reset
-            if (e.code === 'KeyY') {
-                reset();
-            }
+            if (e.code === 'KeyT') startPause();
+            if (e.code === 'KeyY') reset();
         });
     </script>
 </body>
