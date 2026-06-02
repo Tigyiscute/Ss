@@ -31,22 +31,22 @@
             position: absolute;
             top: 24%; 
             left: 0;
-            width: 45%; /* Adjusts how far across the screen the black bar extends */
+            width: 45%; 
             background: #000000; 
             padding: 8px 15px;
             box-sizing: border-box;
             display: flex;
-            justify-content: flex-end; /* Aligns the red numbers strictly to the right side of the bar */
+            justify-content: flex-end; /* Aligns red numbers to the right side of the bar */
             align-items: center;
             z-index: 999999;
-            cursor: pointer; /* Visual cue that clicking here focuses the hotkeys */
+            cursor: pointer; /* Click here to refocus your hotkeys */
         }
 
         /* Pure flat red timer font */
         .time-text {
             font-size: 46px; 
             font-weight: 900;
-            color: #bd0909; /* Deep solid red matching your image */
+            color: #bd0909; /* Red color matching the image */
             letter-spacing: -1px;
             line-height: 1;
             font-variant-numeric: tabular-nums;
@@ -116,7 +116,7 @@
             startPause();
         });
 
-        /* Global key event listeners */
+        // Global key capture routines
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') startPause();
