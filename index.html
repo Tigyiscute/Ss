@@ -14,8 +14,8 @@
             background-color: #000;
         }
 
-        /* Fullscreen Web View Container */
-        .content-frame {
+        /* Container for the native game code */
+        #game-injection-site {
             width: 100%;
             height: 100%;
             border: none;
@@ -31,7 +31,7 @@
             border-radius: 2px;
             user-select: none;
             z-index: 999999;
-            pointer-events: none; /* Allows clicks to pass through to the game */
+            pointer-events: none;
         }
 
         /* White text with the specific shadow layering */
@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <iframe id="game-frame" class="content-frame" src="https://ss.randomkzn.com"></iframe>
+    <div id="game-injection-site"></div>
 
     <div class="timer-widget">
         <div class="time-display" id="display">0:00.00</div>
@@ -61,7 +61,37 @@
         let timerInterval = null;
         let isRunning = false;
         const displayEl = document.getElementById('display');
-        const gameFrame = document.getElementById('game-frame');
+
+        // Bypassing the iframe wall by pulling the document layout directly
+        const targetUrl = "https://ss.randomkzn.com";
+        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
+
+        fetch(proxyUrl)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('game-injection-site');
+                
+                // Fix relative asset links from the target site so images/scripts load
+                let cleanHtml = data.contents;
+                cleanHtml = cleanHtml.replace(/(src|href)="\/([^"\s>]+)"/g, `$1="${targetUrl}/$2"`);
+                
+                container.innerHTML = cleanHtml;
+                
+                // Re-evaluate scripts so the game actually runs inside our window
+                const scripts = container.getElementsByTagName('script');
+                for (let script of scripts) {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(err => {
+                console.error("Failed to inject game directly:", err);
+            });
 
         function startPause() {
             if (!isRunning) {
@@ -103,28 +133,12 @@
             }
         }
 
-        // Listen on the main page
+        // Because everything lives on ONE layer now, this global listener captures EVERYTHING
         window.addEventListener('keydown', (e) => {
-            handleBinds(e);
-        }, true);
-
-        // This force-checks your keyboard actions even if you are clicked into the iframe game
-        function handleBinds(e) {
             const key = e.key.toLowerCase();
-            if (key === 't') {
-                startPause();
-            }
-            if (key === 'y') {
-                reset();
-            }
-        }
-
-        // Keep polling the window focus context automatically 
-        setInterval(() => {
-            if (document.activeElement !== gameFrame) {
-                window.focus();
-            }
-        }, 100);
+            if (key === 't') startPause();
+            if (key === 'y') reset();
+        }, true);
     </script>
 </body>
 </html>
