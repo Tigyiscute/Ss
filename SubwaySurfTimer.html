@@ -26,29 +26,29 @@
             z-index: 1;
         }
 
-        /* Skinny, locked black bar that stays identical on any resolution */
+        /* Thick black block matching image_4.png exactly */
         .timer-bar {
             position: absolute;
             top: 24%; 
             left: 0;
-            width: 110px; /* Slimmer width so it perfectly cuts off after the text */
-            height: 26px; /* Skinny height matching the live stream crop */
+            width: 200px; /* Locked width */
+            height: 55px; /* Restored thickness - Not skinny */
             background: #000000; 
-            padding: 0 8px;
+            padding: 0 15px;
             box-sizing: border-box;
             display: flex;
-            justify-content: flex-end; /* Aligns white numbers strictly to the right side */
+            justify-content: flex-end; /* Aligns white numbers to the right */
             align-items: center;
             z-index: 999999;
-            cursor: pointer; /* Click here to focus your hotkeys */
+            cursor: pointer;
         }
 
-        /* Compact, clean white timer font */
+        /* Bold white timer text matching image_4.png layout */
         .time-text {
-            font-size: 20px; /* Scaled down to fit perfectly inside the skinny bar */
+            font-size: 42px; /* Thick, readable text size */
             font-weight: 900;
-            color: #ffffff; /* Crisp white text */
-            letter-spacing: -0.5px;
+            color: #ffffff; /* Solid White */
+            letter-spacing: -1px;
             line-height: 1;
             font-variant-numeric: tabular-nums;
             user-select: none;
@@ -57,8 +57,10 @@
 </head>
 <body>
 
+    <!-- Fullscreen Game Frame Layer -->
     <iframe id="game-frame" class="game-view" src="https://ss.randomkzn.com"></iframe>
 
+    <!-- Thick Black Bar Overlay -->
     <div class="timer-bar" id="binder-surface">
         <div class="time-text" id="time-display">0.00</div>
     </div>
@@ -111,13 +113,13 @@
             }
         }
 
-        /* Clicking the black bar instantly pulls keyboard focus back to the timer */
+        /* Clicking the black bar focuses the hotkeys */
         binderSurface.addEventListener('click', () => {
             window.focus();
             startPause();
         });
 
-        // Global key capture routines
+        // T to Start/Stop, Y to Reset
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') startPause();
