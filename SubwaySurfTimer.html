@@ -14,82 +14,51 @@
             background-color: #000;
         }
 
-        /* Replaced iframe with a native container to bypass "Refused to Connect" */
-        #game-container {
+        .content-frame {
             width: 100%;
             height: 100%;
             border: none;
-            overflow: auto;
         }
 
-        /* Ultra-compact minimalist box */
         .timer-widget {
             position: fixed;
             bottom: 15px;
             right: 15px;
             background: #000000; 
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 2px;
             user-select: none;
             z-index: 999999;
-            pointer-events: none; 
         }
 
-        /* White text with the specific shadow layering */
         .time-display {
             font-family: Arial, sans-serif;
             font-size: 36px; 
             font-weight: 900;
             color: #ffffff;
-            /* Hard-edged shadow to create the 'shade' effect */
             text-shadow: 2px 2px 0px #333333, 
                          4px 4px 0px #1a1a1a; 
             letter-spacing: -1px;
             line-height: 1;
         }
-
-        #loading-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff;
-            display: flex; justify-content: center; align-items: center;
-            font-family: Arial, sans-serif; font-size: 20px; z-index: 1000000;
-        }
     </style>
 </head>
 <body>
 
-    <div id="loading-screen">Bypassing connection restrictions...</div>
-    <div id="game-container"></div>
+    <iframe class="content-frame" src="https://ss.randomkzn.com"></iframe>
 
-    <div class="timer-widget">
+    <div class="timer-widget" id="widget">
         <div class="time-display" id="display">0:00.00</div>
     </div>
 
     <script>
-        // Use a clean proxy fetch to pull raw page data instead of framing it
-        const targetUrl = "https://therealoness.squareweb.app/newyork";
-        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
-
-        fetch(proxyUrl)
-            .then(res => {
-                if (!res.ok) throw new Error();
-                return res.json();
-            })
-            .then(data => {
-                document.getElementById('game-container').innerHTML = data.contents;
-                document.getElementById('loading-screen').style.display = 'none';
-            })
-            .catch(() => {
-                document.getElementById('loading-screen').innerText = "Connection failed. Try refreshing.";
-            });
-
-        // Timer Logic
         let startTime = 0;
         let elapsedTime = 0;
         let timerInterval = null;
         let isRunning = false;
+        
         const displayEl = document.getElementById('display');
+        const widgetEl = document.getElementById('widget');
 
         function startPause() {
             if (!isRunning) {
@@ -131,12 +100,16 @@
             }
         }
 
-        // Binds listening on the root window level
+        widgetEl.addEventListener('click', () => {
+            window.focus();
+            startPause();
+        });
+
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') startPause();
             if (key === 'y') reset();
-        }, true);
+        });
     </script>
 </body>
 </html>
