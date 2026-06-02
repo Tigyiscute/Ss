@@ -19,21 +19,6 @@
             width: 100%;
             height: 100%;
             border: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        /* Invisible layer that intercepts focus to keep binds alive */
-        .focus-protector {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            background: transparent;
         }
 
         /* Ultra-compact minimalist box */
@@ -46,6 +31,7 @@
             border-radius: 2px;
             user-select: none;
             z-index: 999999;
+            pointer-events: none; /* Allows clicks to pass through to the game */
         }
 
         /* White text with the specific shadow layering */
@@ -63,9 +49,7 @@
 </head>
 <body>
 
-    <iframe class="content-frame" src="https://ss.randomkzn.com"></iframe>
-
-    <div class="focus-protector" id="catcher"></div>
+    <iframe id="game-frame" class="content-frame" src="https://ss.randomkzn.com"></iframe>
 
     <div class="timer-widget">
         <div class="time-display" id="display">0:00.00</div>
@@ -77,7 +61,7 @@
         let timerInterval = null;
         let isRunning = false;
         const displayEl = document.getElementById('display');
-        const catcher = document.getElementById('catcher');
+        const gameFrame = document.getElementById('game-frame');
 
         function startPause() {
             if (!isRunning) {
@@ -119,24 +103,28 @@
             }
         }
 
-        // Global Key Listener mapping T and Y
+        // Listen on the main page
         window.addEventListener('keydown', (e) => {
+            handleBinds(e);
+        }, true);
+
+        // This force-checks your keyboard actions even if you are clicked into the iframe game
+        function handleBinds(e) {
             const key = e.key.toLowerCase();
             if (key === 't') {
-                e.preventDefault();
                 startPause();
             }
             if (key === 'y') {
-                e.preventDefault();
                 reset();
             }
-        }, true);
+        }
 
-        // Forcing the browser to keep focus on the binder window layer
-        window.focus();
-        document.addEventListener('click', () => {
-            window.focus();
-        });
+        // Keep polling the window focus context automatically 
+        setInterval(() => {
+            if (document.activeElement !== gameFrame) {
+                window.focus();
+            }
+        }, 100);
     </script>
 </body>
 </html>
