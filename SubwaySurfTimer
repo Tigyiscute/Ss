@@ -22,68 +22,37 @@
             border: none;
         }
 
-        /* Exact layout style from your image */
+        /* Scaled-down minimalist container box */
         .timer-widget {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px;
+            right: 20px;
             background: #000000; /* Solid black container box */
-            padding: 10px 25px;
-            border-radius: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            padding: 6px 14px;
+            border-radius: 3px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             user-select: none;
             z-index: 999999;
             text-align: center;
         }
 
-        /* Crisp white timer text with a heavy, sharp dark gray drop shadow */
+        /* Smaller, compact crisp white text with the custom dark drop shadow */
         .time-display {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-size: 56px;
+            font-size: 38px; /* Reduced from 56px to make it smaller */
             font-weight: 700;
-            color: #ffffff; /* Solid White */
+            color: #ffffff;
             
-            /* The specific shading block matching the depth from your reference photo */
+            /* Sharp shadow for depth */
             text-shadow: 2px 2px 0px #222222, 
                          3px 3px 0px #1a1a1a; 
                          
-            letter-spacing: -2px;
+            letter-spacing: -1px;
             line-height: 1;
         }
 
-        /* Keeps the digits perfectly aligned as they change */
         .time-display span {
             font-variant-numeric: tabular-nums;
-        }
-
-        /* Functional control buttons */
-        .timer-controls {
-            display: flex;
-            gap: 5px;
-            margin-top: 12px;
-        }
-
-        .btn {
-            flex: 1;
-            background: #111;
-            border: 1px solid #333;
-            color: #777;
-            padding: 4px 0;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-        .btn:hover { color: #fff; background: #222; }
-
-        .hotkeys-hint {
-            font-size: 9px;
-            color: #444;
-            margin-top: 6px;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 0.5px;
         }
     </style>
 </head>
@@ -92,13 +61,7 @@
     <iframe class="content-frame" src="https://therealoness.squareweb.app/newyork"></iframe>
 
     <div class="timer-widget">
-        <div class="time-display" id="display">1:00.00</div>
-        
-        <div class="timer-controls">
-            <button class="btn" id="startPauseBtn">Start (T)</button>
-            <button class="btn" id="resetBtn">Reset (Y)</button>
-        </div>
-        <div class="hotkeys-hint">T to start • Y to reset</div>
+        <div class="time-display" id="display">1:00.02</div>
     </div>
 
     <script>
@@ -108,20 +71,16 @@
         let isRunning = false;
 
         const displayEl = document.getElementById('display');
-        const startPauseBtn = document.getElementById('startPauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
 
         function startPause() {
             if (!isRunning) {
                 startTime = Date.now() - elapsedTime;
                 timerInterval = setInterval(updateTime, 10);
                 isRunning = true;
-                startPauseBtn.textContent = 'Pause (T)';
             } else {
                 clearInterval(timerInterval);
                 elapsedTime = Date.now() - startTime;
                 isRunning = false;
-                startPauseBtn.textContent = 'Resume (T)';
             }
         }
 
@@ -131,7 +90,6 @@
             elapsedTime = 0;
             isRunning = false;
             displayEl.textContent = '0:00.00';
-            startPauseBtn.textContent = 'Start (T)';
         }
 
         function updateTime() {
@@ -158,10 +116,7 @@
             }
         }
 
-        startPauseBtn.addEventListener('click', startPause);
-        resetBtn.addEventListener('click', reset);
-
-        // Bind Configurations
+        // Invisible Bind Configurations
         window.addEventListener('keydown', (e) => {
             if (e.code === 'KeyT') {
                 startPause();
