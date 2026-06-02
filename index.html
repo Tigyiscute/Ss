@@ -3,108 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedrun Dashboard Launcher</title>
+    <title>Speedrun Dashboard</title>
     <style>
-        body {
-            background: #0a0a0a;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        body, html {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
         }
-        .setup-box {
-            text-align: center;
-            padding: 30px;
-            background: #111;
-            border: 1px solid #222;
-            border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        h1 { font-size: 22px; margin-bottom: 20px; color: #fff; font-weight: 900; }
-        .launch-btn {
-            background: #ffffff;
-            color: #000000;
+
+        /* Fullscreen Web View Container */
+        .content-frame {
+            width: 100%;
+            height: 100%;
             border: none;
-            padding: 12px 30px;
-            font-weight: bold;
-            font-size: 14px;
-            border-radius: 3px;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
-        .launch-btn:hover { background: #dddddd; }
-        
-        /* Floating Speedrun Timer Styles */
-        #floating-timer {
+
+        /* Invisible layer that intercepts focus to keep binds alive */
+        .focus-protector {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background: transparent;
+        }
+
+        /* Ultra-compact minimalist box */
+        .timer-widget {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #000000;
+            bottom: 15px;
+            right: 15px;
+            background: #000000; 
             padding: 4px 12px;
             border-radius: 2px;
             user-select: none;
             z-index: 999999;
-            cursor: move;
-            display: none; /* Hidden until launcher is clicked */
         }
+
+        /* White text with the specific shadow layering */
         .time-display {
             font-family: Arial, sans-serif;
-            font-size: 36px;
+            font-size: 36px; 
             font-weight: 900;
             color: #ffffff;
-            text-shadow: 2px 2px 0px #333333, 4px 4px 0px #1a1a1a;
+            text-shadow: 2px 2px 0px #333333, 
+                         4px 4px 0px #1a1a1a; 
             letter-spacing: -1px;
             line-height: 1;
-        }
-        .drag-handle {
-            font-size: 9px;
-            color: #444;
-            text-align: center;
-            margin-bottom: 2px;
-            text-transform: uppercase;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="setup-box" id="setup-ui">
-        <h1>New York Speedrun Workspace</h1>
-        <button class="launch-btn" id="launch-panel">Open Game & Timer</button>
-    </div>
+    <iframe class="content-frame" src="https://ss.randomkzn.com"></iframe>
 
-    <div id="floating-timer">
-        <div class="drag-handle" id="handle">::: DRAG ME :::</div>
+    <div class="focus-protector" id="catcher"></div>
+
+    <div class="timer-widget">
         <div class="time-display" id="display">0:00.00</div>
     </div>
 
     <script>
-        const launchBtn = document.getElementById('launch-panel');
-        const setupUi = document.getElementById('setup-ui');
-        const timerWidget = document.getElementById('floating-timer');
-        const displayEl = document.getElementById('display');
-
         let startTime = 0;
         let elapsedTime = 0;
         let timerInterval = null;
         let isRunning = false;
+        const displayEl = document.getElementById('display');
+        const catcher = document.getElementById('catcher');
 
-        launchBtn.addEventListener('click', () => {
-            // 1. Opens the game completely standalone in its own optimized window context
-            window.open('https://ss.randomkzn.com', 'GameWindow', 'width=1200,height=800');
-            
-            // 2. Changes the main GitHub page into a clean background workspace containing only the timer
-            setupUi.style.display = 'none';
-            document.body.style.background = 'transparent';
-            timerWidget.style.display = 'block';
-        });
-
-        // Precision Timer Engine
         function startPause() {
             if (!isRunning) {
                 startTime = Date.now() - elapsedTime;
@@ -145,35 +119,24 @@
             }
         }
 
-        // Binds work perfectly here because the game is running on your other screen side
+        // Global Key Listener mapping T and Y
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
-            if (key === 't') startPause();
-            if (key === 'y') reset();
+            if (key === 't') {
+                e.preventDefault();
+                startPause();
+            }
+            if (key === 'y') {
+                e.preventDefault();
+                reset();
+            }
+        }, true);
+
+        // Forcing the browser to keep focus on the binder window layer
+        window.focus();
+        document.addEventListener('click', () => {
+            window.focus();
         });
-
-        // Dragging Logic for the Widget
-        let isDragging = false;
-        let startX, startY, initialX, initialY;
-        const handle = document.getElementById('handle');
-
-        handle.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            initialX = timerWidget.offsetLeft;
-            initialY = timerWidget.offsetTop;
-            startX = e.clientX;
-            startY = e.clientY;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            timerWidget.style.left = (initialX + dx) + 'px';
-            timerWidget.style.top = (initialY + dy) + 'px';
-        });
-
-        document.addEventListener('mouseup', () => { isDragging = false; });
     </script>
 </body>
 </html>
