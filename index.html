@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New York Speedrun Dashboard</title>
+    <title>Speedrun Dashboard</title>
     <style>
         body, html {
             margin: 0;
@@ -12,173 +12,94 @@
             height: 100%;
             overflow: hidden;
             background-color: #000;
-            font-family: Arial, sans-serif;
         }
 
-        /* Container for the loaded website content */
-        #site-container {
+        /* Replaced iframe with a native container to bypass "Refused to Connect" */
+        #game-container {
             width: 100%;
             height: 100%;
             border: none;
             overflow: auto;
         }
 
-        /* Speedrun Timer Widget Overlay */
+        /* Ultra-compact minimalist box */
         .timer-widget {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 280px;
-            background: rgba(17, 17, 17, 0.95);
-            backdrop-filter: blur(4px);
-            border: 2px solid #333;
-            border-radius: 6px;
-            padding: 15px;
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            bottom: 15px;
+            right: 15px;
+            background: #000000; 
+            padding: 4px 12px;
+            border-radius: 2px;
             user-select: none;
             z-index: 999999;
+            pointer-events: none; 
         }
 
-        .timer-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 3px;
-        }
-
+        /* White text with the specific shadow layering */
         .time-display {
-            font-family: monospace;
-            font-size: 38px;
-            font-weight: bold;
-            text-align: right;
-            color: #4ef21d;
-            text-shadow: 0 0 10px rgba(78, 242, 29, 0.3);
+            font-family: Arial, sans-serif;
+            font-size: 36px; 
+            font-weight: 900;
+            color: #ffffff;
+            /* Hard-edged shadow to create the 'shade' effect */
+            text-shadow: 2px 2px 0px #333333, 
+                         4px 4px 0px #1a1a1a; 
             letter-spacing: -1px;
+            line-height: 1;
         }
 
-        .time-display .ms {
-            font-size: 24px;
-            color: #a3f78c;
-        }
-
-        .time-display.paused {
-            color: #aaa;
-            text-shadow: none;
-        }
-        .time-display.paused .ms {
-            color: #888;
-        }
-
-        .timer-controls {
-            display: flex;
-            gap: 5px;
-            margin-top: 10px;
-        }
-
-        .btn {
-            flex: 1;
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 6px 0;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-
-        .btn:hover { background: #333; }
-        .btn-start { border-color: #28a745; }
-        .btn-reset { border-color: #dc3545; }
-
-        .hotkeys-hint {
-            font-size: 9px;
-            color: #555;
-            text-align: center;
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
-
-        /* Loading Screen overlay */
-        #loader {
+        #loading-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #111; color: #4ef21d;
+            background: #000; color: #fff;
             display: flex; justify-content: center; align-items: center;
-            font-size: 20px; font-weight: bold; z-index: 1000000;
-            font-family: monospace;
+            font-family: Arial, sans-serif; font-size: 20px; z-index: 1000000;
         }
     </style>
 </head>
 <body>
 
-    <div id="loader">Syncing Game Data via Global Edge Network...</div>
-
-    <div id="site-container"></div>
+    <div id="loading-screen">Bypassing connection restrictions...</div>
+    <div id="game-container"></div>
 
     <div class="timer-widget">
-        <div class="timer-title">Any% New York Speedrun</div>
-        <div class="time-display paused" id="display">00:00:00<span class="ms">.00</span></div>
-        <div class="timer-controls">
-            <button class="btn btn-start" id="startPauseBtn">Start</button>
-            <button class="btn btn-reset" id="resetBtn">Reset</button>
-        </div>
-        <div class="hotkeys-hint">T: Start/Pause | Y: Reset</div>
+        <div class="time-display" id="display">0:00.00</div>
     </div>
 
     <script>
-        // Utilizing a vastly more stable CDN Global Edge Proxy
-        const proxyUrl = "https://corsproxy.io/?https%3A%2F%2Ftherealoness.squareweb.app%2Fnewyork";
+        // Use a clean proxy fetch to pull raw page data instead of framing it
+        const targetUrl = "https://therealoness.squareweb.app/newyork";
+        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
 
         fetch(proxyUrl)
-            .then(response => {
-                if (!response.ok) throw new Error('Proxy routing failed.');
-                return response.text(); // Grabbing raw HTML structure directly
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
             })
-            .then(htmlContent => {
-                const container = document.getElementById('site-container');
-                
-                // Inject target layout cleanly
-                container.innerHTML = htmlContent;
-                
-                // Drop the loading curtain
-                document.getElementById('loader').style.display = 'none';
+            .then(data => {
+                document.getElementById('game-container').innerHTML = data.contents;
+                document.getElementById('loading-screen').style.display = 'none';
             })
-            .catch(err => {
-                document.getElementById('loader').innerText = "Edge network timeout. Refreshing page...";
-                console.error(err);
-                // Auto fallback refresh if network hangs
-                setTimeout(() => { location.reload(); }, 2000);
+            .catch(() => {
+                document.getElementById('loading-screen').innerText = "Connection failed. Try refreshing.";
             });
 
-        // Speedrun Timer Engine
+        // Timer Logic
         let startTime = 0;
         let elapsedTime = 0;
         let timerInterval = null;
         let isRunning = false;
-
         const displayEl = document.getElementById('display');
-        const startPauseBtn = document.getElementById('startPauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
 
         function startPause() {
             if (!isRunning) {
                 startTime = Date.now() - elapsedTime;
                 timerInterval = setInterval(updateTime, 10);
                 isRunning = true;
-                displayEl.classList.remove('paused');
-                startPauseBtn.textContent = 'Pause';
             } else {
                 clearInterval(timerInterval);
                 elapsedTime = Date.now() - startTime;
                 isRunning = false;
-                displayEl.classList.add('paused');
-                startPauseBtn.textContent = 'Resume';
             }
         }
 
@@ -187,30 +108,35 @@
             startTime = 0;
             elapsedTime = 0;
             isRunning = false;
-            displayEl.classList.add('paused');
-            displayEl.innerHTML = '00:00:00<span class="ms">.00</span>';
-            startPauseBtn.textContent = 'Start';
+            displayEl.textContent = '0:00.00';
         }
 
         function updateTime() {
             elapsedTime = Date.now() - startTime;
-            let ms = elapsedTime;
-            let h = Math.floor(ms / 3600000); ms %= 3600000;
-            let m = Math.floor(ms / 60000); ms %= 60000;
-            let s = Math.floor(ms / 1000);
-            let displayMs = Math.floor((ms % 1000) / 10);
+            let totalMs = elapsedTime;
+            let h = Math.floor(totalMs / 3600000);
+            totalMs %= 3600000;
+            let m = Math.floor(totalMs / 60000);
+            totalMs %= 60000;
+            let s = Math.floor(totalMs / 1000);
+            let ms = Math.floor((totalMs % 1000) / 10);
 
-            displayEl.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}<span class="ms">.${String(displayMs).padStart(2,'0')}</span>`;
+            let sStr = String(s).padStart(2, '0');
+            let msStr = String(ms).padStart(2, '0');
+
+            if (h > 0) {
+                displayEl.textContent = `${h}:${String(m).padStart(2, '0')}:${sStr}.${msStr}`;
+            } else {
+                displayEl.textContent = `${m}:${sStr}.${msStr}`;
+            }
         }
 
-        startPauseBtn.addEventListener('click', startPause);
-        resetBtn.addEventListener('click', reset);
-
-        // Custom Keybinds (T and Y)
+        // Binds listening on the root window level
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyT') startPause();
-            if (e.code === 'KeyY') reset();
-        });
+            const key = e.key.toLowerCase();
+            if (key === 't') startPause();
+            if (key === 'y') reset();
+        }, true);
     </script>
 </body>
 </html>
