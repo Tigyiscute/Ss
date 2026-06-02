@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Overlay & Speedrun Timer</title>
+    <style>
+        /* Reset and layout */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+        }
+
+        /* Fullscreen Iframe */
+        .content-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Speedrun Timer Widget Container */
+        .timer-widget {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 280px;
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(5px);
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            user-select: none;
+            z-index: 9999;
+        }
+
+        /* Timer Header/Title */
+        .timer-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
+        }
+
+        /* Main Time Display */
+        .time-display {
+            font-family: monospace;
+            font-size: 38px;
+            font-weight: bold;
+            text-align: right;
+            color: #4ef21d; /* Classic green running color */
+            text-shadow: 0 0 10px rgba(78, 242, 29, 0.3);
+            letter-spacing: -1px;
+        }
+
+        .time-display .ms {
+            font-size: 24px;
+            color: #a3f78c;
+        }
+
+        /* Timer states */
+        .time-display.paused {
+            color: #aaa;
+            text-shadow: none;
+        }
+        .time-display.paused .ms {
+            color: #888;
+        }
+
+        /* Control Buttons */
+        .timer-controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 6px 0;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #333;
+            border-color: #666;
+        }
+
+        .btn-start { border-color: #28a745; }
+        .btn-start:hover { background: #28a745; }
+        
+        .btn-reset { border-color: #dc3545; }
+        .btn-reset:hover { background: #dc3545; }
+
+        /* Hotkey Legend */
+        .hotkeys-hint {
+            font-size: 9px;
+            color: #555;
+            text-align: center;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <iframe class="content-frame" src="https://therealoness.squareweb.app/newyork"></iframe>
+
+    <div class="timer-widget">
+        <div class="timer-title">Any% New York Speedrun</div>
+        
+        <div class="time-display paused" id="display">
+            00:00:00<span class="ms">.00</span>
+        </div>
+
+        <div class="timer-controls">
+            <button class="btn btn-start" id="startPauseBtn">Start</button>
+            <button class="btn btn-reset" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="hotkeys-hint">
+            Space: Start/Pause | R: Reset
+        </div>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const displayEl = document.getElementById('display');
+        const startPauseBtn = document.getElementById('startPauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function startPause() {
+            if (!isRunning) {
+                // Start
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(updateTime, 10); // Update roughly every 10ms
+                isRunning = true;
+                displayEl.classList.remove('paused');
+                startPauseBtn.textContent = 'Pause';
+                startPauseBtn.style.borderColor = '#ffc107';
+                startPauseBtn.style.backgroundColor = 'transparent';
+            } else {
+                // Pause
+                clearInterval(timerInterval);
+                elapsedTime = Date.now() - startTime;
+                isRunning = false;
+                displayEl.classList.add('paused');
+                startPauseBtn.textContent = 'Resume';
+                startPauseBtn.style.borderColor = '#28a745';
+            }
+        }
+
+        function reset() {
+            clearInterval(timerInterval);
+            startTime = 0;
+            elapsedTime = 0;
+            isRunning = false;
+            displayEl.classList.add('paused');
+            displayEl.innerHTML = '00:00:00<span class="ms">.00</span>';
+            startPauseBtn.textContent = 'Start';
+            startPauseBtn.style.borderColor = '#28a745';
+        }
+
+        function updateTime() {
+            elapsedTime = Date.now() - startTime;
+
+            // Math calculations for time strings
+            let totalMilliseconds = elapsedTime;
+            let hours = Math.floor(totalMilliseconds / 3600000);
+            totalMilliseconds %= 3600000;
+            
+            let minutes = Math.floor(totalMilliseconds / 60000);
+            totalMilliseconds %= 60000;
+            
+            let seconds = Math.floor(totalMilliseconds / 1000);
+            let milliseconds = Math.floor((totalMilliseconds % 1000) / 10); // get 2 digits
+
+            // Formatting digits
+            let hStr = String(hours).padStart(2, '0');
+            let mStr = String(minutes).padStart(2, '0');
+            let sStr = String(seconds).padStart(2, '0');
+            let msStr = String(milliseconds).padStart(2, '0');
+
+            displayEl.innerHTML = `${hStr}:${mStr}:${sStr}<span class="ms">.${msStr}</span>`;
+        }
+
+        // Event Listeners for UI buttons
+        startPauseBtn.addEventListener('click', startPause);
+        resetBtn.addEventListener('click', reset);
+
+        // Professional Keyboard Hotkeys
+        window.addEventListener('keydown', (e) => {
+            // Spacebar toggles start/pause
+            if (e.code === 'Space') {
+                e.preventDefault(); // Stop page scrolling
+                startPause();
+            }
+            // 'R' key resets
+            if (e.code === 'KeyR') {
+                reset();
+            }
+        });
+    </script>
+</body>
+</html>
