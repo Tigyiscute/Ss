@@ -26,13 +26,13 @@
             z-index: 1;
         }
 
-        /* The Skinny Black Bar: Long and thin per image_4.png */
+        /* The Skinny Black Bar */
         .timer-bar {
             position: absolute;
             top: 24%; 
             left: 0;
             width: 160px; 
-            height: 32px; /* Skinny height */
+            height: 32px; 
             background: #000000; 
             padding: 0 10px;
             box-sizing: border-box;
@@ -43,15 +43,19 @@
             cursor: pointer;
         }
 
-        /* White text with size difference */
+        /* Gradient Text Styling */
         .time-text {
-            color: #ffffff; 
             font-weight: 900;
             line-height: 1;
             user-select: none;
             display: flex;
             align-items: baseline;
             font-variant-numeric: tabular-nums;
+            
+            /* White to Gray Gradient */
+            background: linear-gradient(to bottom, #ffffff 30%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* Large main number */
