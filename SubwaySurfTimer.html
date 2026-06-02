@@ -26,27 +26,28 @@
             z-index: 1;
         }
 
-        /* Solid black bar stretching horizontally matching your screenshot */
+        /* Locked, compact black bar that doesn't stretch with resolution */
         .timer-bar {
             position: absolute;
             top: 24%; 
             left: 0;
-            width: 45%; 
+            width: 180px; /* Locked pixel width so it stays small */
+            height: 45px; /* Locked pixel height */
             background: #000000; 
-            padding: 8px 15px;
+            padding: 0 12px;
             box-sizing: border-box;
             display: flex;
-            justify-content: flex-end; /* Aligns red numbers to the right side of the bar */
+            justify-content: flex-end; /* Aligns red numbers strictly to the right side */
             align-items: center;
             z-index: 999999;
-            cursor: pointer; /* Click here to refocus your hotkeys */
+            cursor: pointer; /* Click here to focus your hotkeys */
         }
 
-        /* Pure flat red timer font */
+        /* Scaled down, sharp red timer text */
         .time-text {
-            font-size: 46px; 
+            font-size: 28px; /* Smaller, more compact text size */
             font-weight: 900;
-            color: #bd0909; /* Red color matching the image */
+            color: #bd0909; 
             letter-spacing: -1px;
             line-height: 1;
             font-variant-numeric: tabular-nums;
