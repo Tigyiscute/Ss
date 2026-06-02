@@ -26,15 +26,15 @@
             z-index: 1;
         }
 
-        /* Fixed-size black bar that stays identical on any resolution */
+        /* Skinny, locked black bar that stays identical on any resolution */
         .timer-bar {
             position: absolute;
             top: 24%; 
             left: 0;
-            width: 180px; /* Locked width so it doesn't stretch */
-            height: 45px; /* Locked height */
+            width: 110px; /* Slimmer width so it perfectly cuts off after the text */
+            height: 26px; /* Skinny height matching the live stream crop */
             background: #000000; 
-            padding: 0 12px;
+            padding: 0 8px;
             box-sizing: border-box;
             display: flex;
             justify-content: flex-end; /* Aligns white numbers strictly to the right side */
@@ -43,12 +43,12 @@
             cursor: pointer; /* Click here to focus your hotkeys */
         }
 
-        /* Pure flat white timer font matching the layout */
+        /* Compact, clean white timer font */
         .time-text {
-            font-size: 28px; /* Small, sharp font size */
+            font-size: 20px; /* Scaled down to fit perfectly inside the skinny bar */
             font-weight: 900;
-            color: #ffffff; /* Text color changed to white */
-            letter-spacing: -1px;
+            color: #ffffff; /* Crisp white text */
+            letter-spacing: -0.5px;
             line-height: 1;
             font-variant-numeric: tabular-nums;
             user-select: none;
