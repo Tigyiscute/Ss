@@ -26,7 +26,7 @@
             z-index: 1;
         }
 
-        /* The Skinny Black Bar */
+        /* The Skinny Black Bar: Width 160px, Height 32px */
         .timer-bar {
             position: absolute;
             top: 24%; 
@@ -43,7 +43,7 @@
             cursor: pointer;
         }
 
-        /* Gradient Text Styling */
+        /* High-Contrast Gradient Text */
         .time-text {
             font-weight: 900;
             line-height: 1;
@@ -52,18 +52,22 @@
             align-items: baseline;
             font-variant-numeric: tabular-nums;
             
-            /* White to Gray Gradient */
-            background: linear-gradient(to bottom, #ffffff 30%, #a0a0a0 100%);
+            /* Stronger White to Gray Gradient */
+            background: linear-gradient(to bottom, #ffffff 10%, #888888 90%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            
+            /* Adds a tiny bit of edge definition */
+            -webkit-text-stroke: 0.5px rgba(255,255,255,0.1);
         }
 
-        /* Large main number */
+        /* Main number - stays constant */
         .main-num {
             font-size: 26px;
         }
 
-        /* Smaller decimals */
+        /* Smaller decimals - the "other numbers" */
         .sub-num {
             font-size: 18px; 
             margin-left: 1px;
@@ -132,11 +136,13 @@
             subEl.textContent = `.${msStr}`;
         }
 
+        // Click bar to focus keys and start/pause
         binderSurface.addEventListener('click', () => {
             window.focus();
             startPause();
         });
 
+        // T for Start/Stop, Y for Reset
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') startPause();
