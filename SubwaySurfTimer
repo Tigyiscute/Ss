@@ -14,14 +14,12 @@
             background-color: #000;
         }
 
-        /* Fullscreen Web View Container */
         .content-frame {
             width: 100%;
             height: 100%;
             border: none;
         }
 
-        /* Ultra-compact minimalist box */
         .timer-widget {
             position: fixed;
             bottom: 15px;
@@ -31,16 +29,16 @@
             border-radius: 2px;
             user-select: none;
             z-index: 999999;
-            pointer-events: none;
+            /* Added pointer-events: none to ensure it doesn't block game clicks */
+            pointer-events: none; 
         }
 
-        /* White text with the specific shadow layering */
         .time-display {
             font-family: Arial, sans-serif;
             font-size: 36px; 
             font-weight: 900;
             color: #ffffff;
-            /* Hard-edged shadow to create the 'shade' effect */
+            /* Reinforced shade effect */
             text-shadow: 2px 2px 0px #333333, 
                          4px 4px 0px #1a1a1a; 
             letter-spacing: -1px;
@@ -50,7 +48,7 @@
 </head>
 <body>
 
-    <iframe class="content-frame" src="https://therealoness.squareweb.app/newyork"></iframe>
+    <iframe id="game-frame" class="content-frame" src="https://therealoness.squareweb.app/newyork"></iframe>
 
     <div class="timer-widget">
         <div class="time-display" id="display">0:00.00</div>
@@ -103,11 +101,21 @@
             }
         }
 
-        // T to Start, Y to Reset
+        // IMPROVED KEYBOARD LISTENER
+        // Using 'capture' mode (true) helps catch the event before the iframe can hide it
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyT') startPause();
-            if (e.code === 'KeyY') reset();
-        });
+            const key = e.key.toLowerCase();
+            if (key === 't') {
+                startPause();
+            }
+            if (key === 'y') {
+                reset();
+            }
+        }, true); 
+
+        // Emergency Focus fix: If keys stop working, click the timer once
+        // to bring focus back to the main page.
+        document.body.onclick = () => { window.focus(); };
     </script>
 </body>
 </html>
