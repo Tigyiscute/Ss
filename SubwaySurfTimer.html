@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedrun Dashboard</title>
+    <title>Speedrun Overlay</title>
     <style>
         body, html {
             margin: 0;
@@ -12,43 +12,54 @@
             height: 100%;
             overflow: hidden;
             background-color: #000;
+            font-family: Arial, sans-serif;
         }
 
-        .content-frame {
+        /* Fullscreen Game Frame */
+        .game-view {
             width: 100%;
             height: 100%;
             border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
-        .timer-widget {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
+        /* Solid black bar stretching horizontally matching your screenshot */
+        .timer-bar {
+            position: absolute;
+            top: 24%; 
+            left: 0;
+            width: 45%; /* Adjusts how far across the screen the black bar extends */
             background: #000000; 
-            padding: 6px 14px;
-            border-radius: 2px;
-            user-select: none;
+            padding: 8px 15px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: flex-end; /* Aligns the red numbers strictly to the right side of the bar */
+            align-items: center;
             z-index: 999999;
+            cursor: pointer; /* Visual cue that clicking here focuses the hotkeys */
         }
 
-        .time-display {
-            font-family: Arial, sans-serif;
-            font-size: 36px; 
+        /* Pure flat red timer font */
+        .time-text {
+            font-size: 46px; 
             font-weight: 900;
-            color: #ffffff;
-            text-shadow: 2px 2px 0px #333333, 
-                         4px 4px 0px #1a1a1a; 
+            color: #bd0909; /* Deep solid red matching your image */
             letter-spacing: -1px;
             line-height: 1;
+            font-variant-numeric: tabular-nums;
+            user-select: none;
         }
     </style>
 </head>
 <body>
 
-    <iframe class="content-frame" src="https://ss.randomkzn.com"></iframe>
+    <iframe id="game-frame" class="game-view" src="https://ashuni.lol"></iframe>
 
-    <div class="timer-widget" id="widget">
-        <div class="time-display" id="display">0:00.00</div>
+    <div class="timer-bar" id="binder-surface">
+        <div class="time-text" id="time-display">0.00</div>
     </div>
 
     <script>
@@ -57,8 +68,8 @@
         let timerInterval = null;
         let isRunning = false;
         
-        const displayEl = document.getElementById('display');
-        const widgetEl = document.getElementById('widget');
+        const displayEl = document.getElementById('time-display');
+        const binderSurface = document.getElementById('binder-surface');
 
         function startPause() {
             if (!isRunning) {
@@ -77,34 +88,35 @@
             startTime = 0;
             elapsedTime = 0;
             isRunning = false;
-            displayEl.textContent = '0:00.00';
+            displayEl.textContent = '0.00';
         }
 
         function updateTime() {
             elapsedTime = Date.now() - startTime;
             let totalMs = elapsedTime;
-            let h = Math.floor(totalMs / 3600000);
-            totalMs %= 3600000;
-            let m = Math.floor(totalMs / 60000);
+            
+            let minutes = Math.floor(totalMs / 60000);
             totalMs %= 60000;
-            let s = Math.floor(totalMs / 1000);
-            let ms = Math.floor((totalMs % 1000) / 10);
+            let seconds = Math.floor(totalMs / 1000);
+            let milliseconds = Math.floor((totalMs % 1000) / 10);
 
-            let sStr = String(s).padStart(2, '0');
-            let msStr = String(ms).padStart(2, '0');
+            let sStr = String(seconds).padStart(2, '0');
+            let msStr = String(milliseconds).padStart(2, '0');
 
-            if (h > 0) {
-                displayEl.textContent = `${h}:${String(m).padStart(2, '0')}:${sStr}.${msStr}`;
+            if (minutes > 0) {
+                displayEl.textContent = `${minutes}:${sStr}.${msStr}`;
             } else {
-                displayEl.textContent = `${m}:${sStr}.${msStr}`;
+                displayEl.textContent = `${seconds}.${msStr}`;
             }
         }
 
-        widgetEl.addEventListener('click', () => {
+        /* Clicking the black bar instantly pulls keyboard focus back to the timer */
+        binderSurface.addEventListener('click', () => {
             window.focus();
             startPause();
         });
 
+        /* Global key event listeners */
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 't') startPause();
